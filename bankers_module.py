@@ -14,3 +14,18 @@ class BankersAlgorithm:
         """Reset the model state."""
         self.setup_matrices()
         self.completed_processes = []
+    def setup_matrices(self):
+        """Initialize matrices with zeros."""
+        self.allocation_matrix = np.zeros((self.num_processes, self.num_resources), dtype=int)
+        self.max_matrix = np.zeros((self.num_processes, self.num_resources), dtype=int)
+        self.need_matrix = np.zeros((self.num_processes, self.num_resources), dtype=int)
+        self.available_resources = np.zeros(self.num_resources, dtype=int)
+        self.completed_processes = []
+    
+    def calculate_need(self):
+        """Calculate the need matrix from max and allocation."""
+        self.need_matrix = self.max_matrix - self.allocation_matrix
+        
+        
+        if np.any(self.need_matrix < 0):
+            raise ValueError("Invalid allocation: Some allocations exceed maximum claims")
