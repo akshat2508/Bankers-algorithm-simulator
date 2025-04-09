@@ -29,3 +29,10 @@ class BankersAlgorithm:
         
         if np.any(self.need_matrix < 0):
             raise ValueError("Invalid allocation: Some allocations exceed maximum claims")
+    
+    def is_request_granted(self, process_idx):
+        """Check if the process's resource request can be granted."""
+        for j in range(self.num_resources):
+            if self.need_matrix[process_idx][j] > self.available_resources[j]:
+                return False
+        return True
