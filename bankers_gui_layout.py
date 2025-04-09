@@ -15,3 +15,9 @@ class BankersGUILayout:
         self.setup_input_matrices(num_processes, num_resources)
         font = ('Helvetica', 12)
         header_font = ('Helvetica', 13, 'bold')
+        # Input section for dimensions
+        dimensions_frame = [
+            [sg.Text('Number of Processes:', font=font), sg.Input(num_processes, key='-NUM_PROCESSES-', size=(5, 1), font=font)],
+            [sg.Text('Number of Resources:', font=font), sg.Input(num_resources, key='-NUM_RESOURCES-', size=(5, 1), font=font)],
+            [sg.Button('Create Matrices', key='-CREATE-', font=font, size=(18, 1))]
+        ]
