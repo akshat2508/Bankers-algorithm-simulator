@@ -36,3 +36,47 @@ class BankersAlgorithm:
             if self.need_matrix[process_idx][j] > self.available_resources[j]:
                 return False
         return True
+    
+    def get_safe_sequence(self):
+        """Run banker's algorithm to find a safe sequence."""
+        
+        work = copy.deepcopy(self.available_resources)
+        finish = [False] * self.num_processes
+        safe_sequence = []
+        self.completed_processes = []
+        
+        
+        while len(safe_sequence) < self.num_processes:
+            found = False
+            
+            
+            for i in range(self.num_processes):
+                if not finish[i]:
+                    
+                    can_allocate = True
+                    for j in range(self.num_resources):
+                        if self.need_matrix[i][j] > work[j]:
+                            can_allocate = False
+                            break
+                    
+                    if can_allocate:
+                        
+                        safe_sequence.append(i)
+                        self.completed_processes.append(i)
+                        finish[i] = True
+                        found = True
+                        
+                       
+                        for j in range(self.num_resources):
+                            work[j] += self.allocation_matrix[i][j]
+                        
+                        break
+            
+            if not found:
+                break
+        
+        
+        if len(safe_sequence) == self.num_processes:
+            return safe_sequence
+        else:
+            return None
