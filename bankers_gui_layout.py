@@ -30,3 +30,18 @@ class BankersGUILayout:
             for j in range(num_resources):
                 row.append(sg.Input('0', key=self.allocation_inputs[i][j], size=(5, 1), font=font, pad=(2, 2)))
             allocation_layout.append(row)
+        # Max matrix
+        max_layout = [[sg.Text(' ', font=header_font)] + [sg.Text(f'R{j}', size=(4, 1), font=header_font) for j in range(num_resources)]]
+        for i in range(num_processes):
+            row = [sg.Text(f'P{i}', font=font)]
+            for j in range(num_resources):
+                row.append(sg.Input('0', key=self.max_inputs[i][j], size=(5, 1), font=font, pad=(2, 2)))
+            max_layout.append(row)
+        
+        # Need matrix
+        need_layout = [[sg.Text(' ', font=header_font)] + [sg.Text(f'R{j}', size=(4, 1), font=header_font) for j in range(num_resources)]]
+        for i in range(num_processes):
+            row = [sg.Text(f'P{i}', font=font)]
+            for j in range(num_resources):
+                row.append(sg.Text('0', key=self.need_outputs[i][j], size=(5, 1), font=font, pad=(2, 2)))
+            need_layout.append(row)
