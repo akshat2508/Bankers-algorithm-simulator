@@ -66,12 +66,12 @@ class BankersAlgorithm:
                         finish[i] = True
                         found = True
                         
-                       
+                        # Release resources                  
                         for j in range(self.num_resources):
                             work[j] += self.allocation_matrix[i][j]
                         
                         break
-            
+            # If no process can be added to sequence, we're done 
             if not found:
                 break
         
