@@ -347,4 +347,189 @@ class BankersAlgorithmGUI:
                                    "3. Calculate the Need matrix and detect potential deadlocks.\n\n"
                                    "You can also load sample test cases from the buttons above.\n")
     
+    def create_rag_graph(self, values):
+        """Create and display a Wait-For Graph visualization."""
+        if not self.update_model_from_ui(values):
+            return
 
+        # Display loading message
+        loading_window = sg.Window("Processing", 
+                                [[sg.Text("Generating Wait-For Graph...")]], 
+                                modal=True, finalize=True)
+        loading_window.refresh()
+
+        # Ensure need matrix is calculated first
+        self.model.calculate_need()
+        
+        # Build the wait-for graph
+        G = nx.DiGraph()
+        
+        # Add process nodes
+        for i in range(self.model.num_processes):
+            G.add_node(f"P{i}")
+
+        # Check if deadlock detection has been run
+        if not hasattr(self.model, "completed_processes"):
+            # Run deadlock detection to populate completed_processes
+            self.model.get_safe_sequence()
+        
+        # Identify blocked processes
+        blocked_processes = [i for i in range(self.model.num_processes) 
+                            if i not in self.model.completed_processes]
+        
+        # Add edges based on wait-for relationships
+        for waiting_process in range(self.model.num_processes):
+            # Skip processes that completed in the safety algorithm
+            if waiting_process not in blocked_processes:
+                continue
+                
+            # For each resource type
+            for resource in range(self.model.num_resources):
+                # If this process needs more of this resource than what's available
+                if (self.model.need_matrix[waiting_process][resource] > 
+                    self.model.available_resources[resource]):
+                    
+                    # Find processes holding this resource
+                    for holding_process in range(self.model.num_processes):
+                        # Don't create self-loops
+                        if waiting_process == holding_process:
+                            continue
+                            
+                        # If this process holds some of the needed resource
+                        if self.model.allocation_matrix[holding_process][resource] > 0:
+                            # Add edge: waiting_process → holding_process
+                            edge_exists = G.has_edge(f"P{waiting_process}", f"P{holding_process}")
+                            if not edge_exists:
+                                G.add_edge(f"P{waiting_process}", f"P{holding_process}", 
+                                        )
+        
+        # Detect cycles (cycles indicate deadlocks)
+        cycles = list(nx.simple_cycles(G))
+        cycle_nodes = set()
+        for cycle in cycles:
+            cycle_nodes.update(cycle)
+        
+        # Determine if system is in safe state
+        is_safe = len(self.model.completed_processes) == self.model.num_processes
+
+        loading_window.close()
+
+        # Create visualization window
+       # Modify the layout and display portion
+        graph_layout = [
+        [sg.Text("Resource Allocation Wait-For Graph")],
+        [sg.Frame('', [[sg.Canvas(key='-CANVAS-', size=(800, 600))]], size=(800, 650), expand_x=True)],
+        [sg.Button("Detect Deadlocks"), sg.Button("Save Image"), sg.Button("Close")]
+        ]
+
+        graph_window = sg.Window("Wait-For Graph Analysis", graph_layout, finalize=True, 
+                     resizable=True, size=(1300, 800))
+        
+
+
+        # Create and configure the visualization
+        fig = plt.figure(figsize=(6, 5))
+        ax = fig.add_subplot(111)
+        
+        # Use a simple layout
+        pos = nx.spring_layout(G, seed=42)
+        
+        # Draw nodes with colors indicating their status
+        node_colors = []
+        for node in G.nodes():
+            process_idx = int(node[1:])  # Extract number from "P0", "P1", etc.
+            if process_idx in blocked_processes:
+                node_colors.append('red')  # Blocked processes
+            else:
+                node_colors.append('green')  # Safe processes
+        
+        # Draw nodes
+        if G.nodes():
+            nx.draw_networkx_nodes(G, pos, node_color=node_colors)
+            nx.draw_networkx_labels(G, pos)
+        
+        # Draw edges
+        if G.edges():
+            nx.draw_networkx_edges(G, pos, arrows=True)
+            
+            # Add edge labels showing resource types
+            edge_labels = {(u, v): data.get('resource', '') 
+                        for u, v, data in G.edges(data=True)}
+            nx.draw_networkx_edge_labels(G, pos, edge_labels=edge_labels, font_size=8)
+        
+        # Highlight cycles if any
+        if cycles:
+            cycle_edges = []
+            for cycle in cycles:
+                for i in range(len(cycle)):
+                    cycle_edges.append((cycle[i], cycle[(i+1) % len(cycle)]))
+            
+            nx.draw_networkx_edges(G, pos, edgelist=cycle_edges, 
+                                edge_color='blue', width=1.2)
+        
+        # Add title and remove axes
+        if is_safe:
+            ax.set_title("Wait-For Graph (System in Safe State)")
+        else:
+            if cycles:
+                ax.set_title("Wait-For Graph (Deadlock Detected)")
+            else:
+                ax.set_title("Wait-For Graph (Unsafe State, No Direct Deadlock)")
+        
+        ax.axis('off')
+        
+        # Add legend
+        red_patch = mpatches.Patch(color='red', label='Blocked Process')
+        green_patch = mpatches.Patch(color='green', label='Safe Process')
+        plt.legend(handles=[red_patch, green_patch], loc='upper right')
+        
+        # Add explanation
+        if G.edges():
+            plt.figtext(0.5, 0.01, "An arrow from Pi to Pj means Pi is waiting for resources held by Pj", 
+                    ha="center")
+        else:
+            plt.figtext(0.5, 0.01, "No wait-for relationships detected", 
+                    ha="center")
+        
+        plt.tight_layout()
+
+        # Display graph in the window
+        canvas_elem = graph_window['-CANVAS-'].TKCanvas
+        figure_canvas_agg = FigureCanvasTkAgg(fig, canvas_elem)
+        figure_canvas_agg.draw()
+        figure_canvas_agg.get_tk_widget().pack(side='top', fill='both', expand=0)
+
+        # Handle window events
+        while True:
+            event, values = graph_window.read()
+            if event == sg.WIN_CLOSED or event == 'Close':
+                break
+            elif event == 'Detect Deadlocks':
+                if cycles:
+                    cycle_info = "Deadlock Cycles Detected:\n\n"
+                    for i, cycle in enumerate(cycles):
+                        cycle_str = " → ".join(cycle) + " → " + cycle[0]
+                        cycle_info += f"Cycle {i+1}: {cycle_str}\n"
+                    sg.popup_scrolled(cycle_info, title="Deadlock Analysis", size=(50, 10))
+                else:
+                    # Show safe sequence if available
+                    if is_safe and hasattr(self.model, "safe_sequence"):
+                        safe_seq = " → ".join([f"P{p}" for p in self.model.safe_sequence])
+                        sg.popup(f"System is in a safe state\n\nSafe sequence: {safe_seq}", 
+                                title="Deadlock Analysis")
+                    else:
+                        sg.popup("No direct deadlock cycles detected, but system may be in UNSAFE state.", 
+                                title="Deadlock Analysis")
+            elif event == 'Save Image':
+                try:
+                    filename = sg.popup_get_file('Save graph as', save_as=True, 
+                                            file_types=(("PNG Files", "*.png"), ("All Files", "*.*")),
+                                            default_extension=".png")
+                    if filename:
+                        fig.savefig(filename, dpi=300, bbox_inches='tight')
+                        sg.popup(f"Graph saved successfully to:\n{filename}")
+                except Exception as e:
+                    sg.popup_error(f"Error saving file: {str(e)}")
+
+        plt.close(fig)
+        graph_window.close()
