@@ -533,3 +533,264 @@ class BankersAlgorithmGUI:
 
         plt.close(fig)
         graph_window.close()
+
+        
+
+    def create_wfg(self, values):
+        """Create and display a Resource Allocation Graph (RAG) visualization."""
+        if not self.update_model_from_ui(values):
+            return
+
+        # Display loading message
+        loading_window = sg.Window("Processing",
+                                [[sg.Text("Generating Resource Allocation Graph...")]],
+                                modal=True, finalize=True)
+        loading_window.refresh()
+
+        # Ensure need matrix is calculated first
+        self.model.calculate_need()
+
+        # Build the resource allocation graph
+        G = nx.DiGraph()
+
+        # Add process nodes
+        for i in range(self.model.num_processes):
+            G.add_node(f"P{i}", type='process')
+
+        # Add resource nodes
+        for j in range(self.model.num_resources):
+            G.add_node(f"R{j}", type='resource')
+
+        # Add assignment edges: Rj → Pi (resource is allocated to a process)
+        for i in range(self.model.num_processes):
+            for j in range(self.model.num_resources):
+                if self.model.allocation_matrix[i][j] > 0:
+                    G.add_edge(f"R{j}", f"P{i}")
+
+        # Add request edges: Pi → Rj (process is requesting resource)
+        for i in range(self.model.num_processes):
+            for j in range(self.model.num_resources):
+                if self.model.need_matrix[i][j] > 0 and self.model.available_resources[j] < self.model.need_matrix[i][j]:
+                    G.add_edge(f"P{i}", f"R{j}")
+
+        # Detect cycles (optional deadlock detection)
+        cycles = list(nx.simple_cycles(G))
+        cycle_nodes = set()
+        for cycle in cycles:
+            cycle_nodes.update(cycle)
+
+        # Determine if system is in safe state
+        if not hasattr(self.model, "completed_processes"):
+            self.model.get_safe_sequence()
+        is_safe = len(self.model.completed_processes) == self.model.num_processes
+
+        loading_window.close()
+
+        # UI layout
+        graph_layout = [
+            [sg.Text("Resource Allocation Graph")],
+            [sg.Frame('', [[sg.Canvas(key='-CANVAS-', size=(800, 600))]], size=(800, 650), expand_x=True)],
+            [sg.Button("Detect Deadlocks"), sg.Button("Save Image"), sg.Button("Close")]
+        ]
+
+        graph_window = sg.Window("RAG Analysis", graph_layout, finalize=True,
+                                resizable=True, size=(1300, 800))
+
+        # Visualization
+        fig = plt.figure(figsize=(6, 5))
+        ax = fig.add_subplot(111)
+        pos = nx.spring_layout(G, seed=42)
+
+        # Node coloring and grouping
+        process_nodes = []
+        resource_nodes = []
+        node_colors = []
+
+        for node in G.nodes():
+            ntype = G.nodes[node].get('type')
+            if ntype == 'process':
+                process_nodes.append(node)
+                process_idx = int(node[1:])
+                color = 'red' if process_idx not in self.model.completed_processes else 'green'
+                node_colors.append(color)
+            elif ntype == 'resource':
+                resource_nodes.append(node)
+
+        # Draw nodes separately by type
+        nx.draw_networkx_nodes(G, pos, nodelist=process_nodes,
+                            node_color=['red' if int(n[1:]) not in self.model.completed_processes else 'green' for n in process_nodes],
+                            node_shape='o', node_size=400)
+        nx.draw_networkx_nodes(G, pos, nodelist=resource_nodes,
+                            node_color='skyblue', node_shape='s', node_size=400)
+
+        nx.draw_networkx_labels(G, pos)
+        nx.draw_networkx_edges(G, pos, arrows=True)
+
+        # Highlight cycles (potential deadlocks)
+        if cycles:
+            cycle_edges = []
+            for cycle in cycles:
+                for i in range(len(cycle)):
+                    cycle_edges.append((cycle[i], cycle[(i + 1) % len(cycle)]))
+            nx.draw_networkx_edges(G, pos, edgelist=cycle_edges,
+                                edge_color='blue', width=1.2)
+
+        # Title
+        if is_safe:
+            ax.set_title("Resource Allocation Graph (System in Safe State)")
+        else:
+            if cycles:
+                ax.set_title("Resource Allocation Graph (Deadlock Detected)")
+            else:
+                ax.set_title("Resource Allocation Graph (Unsafe State, No Direct Deadlock)")
+
+        ax.axis('off')
+
+        # Legend
+        red_patch = mpatches.Patch(color='red', label='Blocked Process')
+        green_patch = mpatches.Patch(color='green', label='Safe Process')
+        blue_patch = mpatches.Patch(color='skyblue', label='Resource')
+        plt.legend(handles=[red_patch, green_patch, blue_patch], loc='upper right')
+
+        # Explanation
+        if G.edges():
+            plt.figtext(0.5, 0.01, "Arrow from Pi to Rj: Request | Arrow from Rj to Pi: Allocation", ha="center")
+        else:
+            plt.figtext(0.5, 0.01, "No allocation or request relationships detected", ha="center")
+
+        plt.tight_layout()
+
+        # Display graph in window
+        canvas_elem = graph_window['-CANVAS-'].TKCanvas
+        figure_canvas_agg = FigureCanvasTkAgg(fig, canvas_elem)
+        figure_canvas_agg.draw()
+        figure_canvas_agg.get_tk_widget().pack(side='top', fill='both', expand=0)
+
+        # Handle events
+        while True:
+            event, values = graph_window.read()
+            if event == sg.WIN_CLOSED or event == 'Close':
+                break
+            elif event == 'Detect Deadlocks':
+                if cycles:
+                    cycle_info = "Deadlock Cycles Detected:\n\n"
+                    for i, cycle in enumerate(cycles):
+                        cycle_str = " → ".join(cycle) + " → " + cycle[0]
+                        cycle_info += f"Cycle {i+1}: {cycle_str}\n"
+                    sg.popup_scrolled(cycle_info, title="Deadlock Analysis", size=(50, 10))
+                else:
+                    if is_safe and hasattr(self.model, "safe_sequence"):
+                        safe_seq = " → ".join([f"P{p}" for p in self.model.safe_sequence])
+                        sg.popup(f"System is in a safe state\n\nSafe sequence: {safe_seq}",
+                                title="Deadlock Analysis")
+                    else:
+                        sg.popup("No deadlock cycles detected, but system may be in UNSAFE state.",
+                                title="Deadlock Analysis")
+            elif event == 'Save Image':
+                try:
+                    filename = sg.popup_get_file('Save graph as', save_as=True,
+                                                file_types=(("PNG Files", "*.png"), ("All Files", "*.*")),
+                                                default_extension=".png")
+                    if filename:
+                        fig.savefig(filename, dpi=300, bbox_inches='tight')
+                        sg.popup(f"Graph saved successfully to:\n{filename}")
+                except Exception as e:
+                    sg.popup_error(f"Error saving file: {str(e)}")
+
+        plt.close(fig)
+        graph_window.close()
+
+
+
+
+
+
+
+
+
+    
+    def run(self):
+        """Main function to run the application."""
+        # Update layout manager to include the RAG button
+        self.layout_manager.include_rag_button = True
+        
+        # Create initial window with default dimensions
+        initial_layout = self.layout_manager.create_layout(self.model.num_processes, self.model.num_resources)
+        window = sg.Window('Banker\'s Algorithm Simulator', initial_layout, resizable=True, finalize=True)
+        
+        # Set initial message
+        window['-RESULTS-'].print("Welcome to Banker's Algorithm Simulator!\n\n")
+        window['-RESULTS-'].print("1. Start by setting the number of processes and resources.\n")
+        window['-RESULTS-'].print("2. Create matrices and fill in the allocation and max requirements.\n")
+        window['-RESULTS-'].print("3. Calculate the Need matrix and detect potential deadlocks.\n\n")
+        window['-RESULTS-'].print("4. You can visualize the Resource Allocation Graph with the 'Show RAG' button.\n\n")
+        window['-RESULTS-'].print("You can also load sample test cases from the buttons above.\n")
+        
+        # Event loop
+        while True:
+            event, values = window.read()
+            
+            if event == sg.WIN_CLOSED:
+                break
+            
+            elif event == '-CREATE-':
+                # Get new dimensions
+                try:
+                    n_processes = int(values['-NUM_PROCESSES-'])
+                    n_resources = int(values['-NUM_RESOURCES-'])
+                    
+                    if n_processes < 1 or n_processes > 10 or n_resources < 1 or n_resources > 10:
+                        sg.popup_error("Processes and resources must be between 1 and 10")
+                        continue
+                    
+                    # Create new model and UI
+                    self.model.num_processes = n_processes
+                    self.model.num_resources = n_resources
+                    self.model.setup_matrices()
+                    
+                    # Close current window and create new one
+                    window.close()
+                    layout = self.layout_manager.create_layout(n_processes, n_resources)
+                    window = sg.Window('Banker\'s Algorithm Simulator', layout, resizable=True, finalize=True)
+                    
+                    # Set initial message
+                    window['-RESULTS-'].print("Matrices created successfully!\n\n")
+                    window['-RESULTS-'].print("Next steps:\n")
+                    window['-RESULTS-'].print("1. Fill in the Allocation Matrix with currently allocated resources\n")
+                    window['-RESULTS-'].print("2. Fill in the Max Matrix with maximum resource requirements\n")
+                    window['-RESULTS-'].print("3. Fill in Available Resources\n")
+                    window['-RESULTS-'].print("4. Click 'Calculate Need Matrix' to continue\n")
+                    
+                except ValueError:
+                    sg.popup_error("Please enter valid numbers")
+            
+            elif event == '-CALCULATE_NEED-':
+                self.calculate_need(window, values)
+            
+            elif event == '-DETECT_DEADLOCK-':
+                self.detect_deadlock(window, values)
+            
+            elif event == '-RECOVER-':
+                self.recover_deadlock(window, values)
+            
+            elif event == '-RESET-':
+                self.reset(window)
+            
+            elif event == '-DEADLOCK_CASE-':
+                self.load_deadlock_case(window)
+            
+            elif event == '-NO_DEADLOCK_CASE-':
+                self.load_no_deadlock_case(window)
+                
+            elif event == '-SHOW_RAG-':
+                self.create_rag_graph(values)
+            
+            elif event == '-SHOW_WFG-':
+                self.create_wfg(values)
+        
+        window.close()
+
+# Main entry point
+if __name__ == "__main__":
+    app = BankersAlgorithmGUI()
+    app.run()
