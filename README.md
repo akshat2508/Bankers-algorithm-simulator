@@ -1,86 +1,106 @@
 # 🏦 Banker's Algorithm Simulator
 
-A comprehensive graphical simulator for the Banker's Algorithm — a classical resource allocation and deadlock avoidance strategy used in operating systems.
+A comprehensive graphical simulator for the **Banker's Algorithm** — a classical resource allocation and deadlock avoidance strategy used in operating systems.
 
 ---
 
 ## 📌 Overview
 
-The Banker's Algorithm Simulator is a Python-based desktop application that allows users to simulate, test, and visualize the working of the Banker's Algorithm. It's built with a focus on educational clarity, interactivity, and real-world relevance.
+The **Banker's Algorithm Simulator** is a desktop application written in Python that enables users to interactively simulate the Banker's Algorithm, observe how processes request and release resources, and visualize how the system reacts to each state change.
 
-This tool is ideal for:
-
-- Students trying to understand deadlock avoidance
-- Educators creating demonstrations or assignments
-- Developers building OS-level resource managers
+Whether you're a student, educator, or operating systems enthusiast, this tool is designed to make learning **deadlock avoidance** engaging and hands-on.
 
 ---
 
 ## ✨ Key Features
 
-- **Intuitive GUI** using PySimpleGUI
-- **Dynamic Resource Allocation** with step-by-step safety checks
-- **Custom Test Case Support** to simulate real-world resource distributions
-- **Deadlock Detection & Recovery** simulation logic
-- **Graphical Visualizations** of the Wait-For Graph (WFG) and Resource Allocation Graph (RAG)
-- **Request Validation** with live feedback on system state
+- ✅ **User-Friendly GUI** built with PySimpleGUI
+- 🔄 **Dynamic Input Forms** for custom matrix generation
+- 🔐 **Live Request Handling** and safety checks
+- 📉 **Graphical Visualizations**: Resource Allocation Graph (RAG) and Wait-For Graph (WFG)
+- 🔁 **Deadlock Detection & Recovery**
+- 📂 **Preloaded Test Cases** and support for custom entries
+- 🧪 **Step-by-Step Execution** with clear logs of every decision
 
 ---
 
 ## 🧠 Core Concepts Implemented
 
-- **Banker's Algorithm Logic**
-- **Safety Sequence Validation**
-- **Need Matrix and Available Resource Calculations**
-- **Request Handling with Safety Checks**
-- **Deadlock Detection through Graph Analysis**
+- Banker's Safety Algorithm
+- Deadlock Detection Algorithm using Wait-For Graphs
+- Resource Allocation Matrix
+- Max Requirement Matrix
+- Available Resources Calculation
+- Need Matrix Derivation
+- Request Granting & Rejection with proper logging
 
 ---
 
-## 🗂️ Project Structure
+## 🧮 Mathematical Model Behind
 
-akshat2508-bankers-algorithm-simulator/ ├── README.md → Project documentation ├── main.py → Entry point for the simulator ├── bankers_module.py → Core logic for the Banker's Algorithm ├── bankers_gui_layout.py → UI layout and design (PySimpleGUI) ├── bankers_gui_controller.py → Event handling and logic controller └── test_cases.py → Predefined scenarios for testing
+The system validates safety using the following matrices:
 
-yaml
+- **Available**: Vector of available resources  
+- **Max**: Matrix defining max demand of each process  
+- **Allocation**: Current resource allocation to each process  
+- **Need** = `Max - Allocation`
+
+The simulator performs a safety check after every request:
+
+```text
+If Request[i] <= Need[i] and Request[i] <= Available:
+    Pretend to allocate → Check if system remains in safe state
+    If safe → Grant request
+    Else → Deny and revert
+🗂️ Project Structure
+rust
 Copy
 Edit
+akshat2508-bankers-algorithm-simulator/
+├── README.md                  → Project documentation
+├── main.py                    → App entry point
+├── bankers_module.py          → Core Banker's Algorithm logic
+├── bankers_gui_layout.py      → GUI layout (PySimpleGUI)
+├── bankers_gui_controller.py  → Logic & input/output controller
+└── test_cases.py              → Preset scenarios for quick demos
+👥 Developer Contributions
+🧩 Mansi
+Developed bankers_module.py and test_cases.py
 
----
+Implemented core algorithm logic, matrix operations, and test validations
 
-## 👥 Developer Roles
+🎨 Nandini
+Created main.py and bankers_gui_layout.py
 
-**Mansi**  
-- Implemented `bankers_module.py` and `test_cases.py`  
-- Focused on the algorithm core, safety checks, request processing, and unit testing
+Designed user interface, layout flow, and input mechanisms
 
-**Nandini**  
-- Developed `main.py` and `bankers_gui_layout.py`  
-- Designed user interface layouts and handled user inputs, forms, and visual components
+🔧 Akshat
+Handled bankers_gui_controller.py
 
-**Akshat**  
-- Built `bankers_gui_controller.py`  
-- Connected UI to the algorithm logic, handled events, input validation, and visual result updates
+Built controller for logic-UI integration, event flow, and visual feedback
 
----
+🛠️ Built With
+Python 3.6+
 
-## 🛠️ Built With
+PySimpleGUI – GUI rendering
 
-- **Python 3.6+**
-- **PySimpleGUI** - for GUI
-- **Matplotlib** - for plotting graphs
-- **NetworkX** - for graph-based resource allocation models
-- **NumPy** - for matrix operations
+NumPy – matrix and vector manipulation
 
----
+NetworkX – graph creation (WFG and RAG)
 
-## ⚙️ Installation
+Matplotlib – rendering graphs
 
-1. Ensure Python 3.6 or above is installed
-2. Clone the repository:
-   ```bash
-   git clone https://github.com/akshat2508/bankers-algorithm-simulator.git
-   cd bankers-algorithm-simulator
-Install dependencies:
+⚙️ Installation
+Make sure Python 3.6+ is installed
+
+Clone the repository:
+
+bash
+Copy
+Edit
+git clone https://github.com/akshat2508/bankers-algorithm-simulator.git
+cd bankers-algorithm-simulator
+Install required packages:
 
 bash
 Copy
@@ -93,39 +113,61 @@ bash
 Copy
 Edit
 python main.py
-Follow on-screen steps to:
+Then simply:
 
-Enter number of processes and resources
+Enter the number of processes and resources
 
-Define allocation and max requirement matrices
+Fill the Allocation and Max Requirement matrices
 
-Submit requests and check safety
+Click “Check Safety” to run the algorithm
 
-Visualize WFG and RAG
+Enter custom requests and test outcomes
+
+Visualize current system state through graphs
 
 📊 Example Use Case
-Open the app
+Open the app via python main.py
 
-Load a test case or create a custom input
+Input 5 processes and 3 resources
 
-Click “Check Safety” to see if the current state is safe
+Enter allocation and maximum matrices
 
-Submit a request and validate whether it's grantable
+Click on “Check Safety” to validate current state
 
-View graphs to understand process dependencies and allocations
+Enter a request vector for a process
+
+Instantly see if the request can be granted
+
+Click “Show WFG” or “Show RAG” to understand the system visually
+
+📚 Educational Value
+💡 Understand how the system reacts to unsafe states
+
+🔄 Experiment with different matrices and scenarios
+
+📈 See how deadlock conditions arise and how the algorithm avoids them
+
+🧠 Great for demos, assignments, lab work, and viva prep
+
 
 🤝 Contributions
-We welcome contributions from the community!
+We love contributors! To contribute:
 
-Fork the repo
+Fork the repository
 
-Create a new branch
+Create a feature branch
 
 Make your changes
 
 Submit a Pull Request
 
+New features, bug fixes, and documentation improvements are always welcome ✨
+
 📄 License
 This project is licensed under the MIT License.
+Feel free to use, modify, and distribute with attribution.
+
+🔚 Final Notes
+This simulator was created to bridge the gap between textbook theory and practical understanding of deadlock avoidance in operating systems. With visual feedback, simplified input, and thorough implementation, it’s designed to be both technically solid and fun to use!
 
 Made with ❤️ by Akshat, Mansi, and Nandini
