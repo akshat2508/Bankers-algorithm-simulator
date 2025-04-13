@@ -16,13 +16,14 @@ class BankersGUILayout:
         self.setup_input_matrices(num_processes, num_resources)
         font = ('Helvetica', 12)
         header_font = ('Helvetica', 13, 'bold')
+        
         # Input section for dimensions
         dimensions_frame = [
             [sg.Text('Number of Processes:', font=font), sg.Input(num_processes, key='-NUM_PROCESSES-', size=(5, 1), font=font)],
             [sg.Text('Number of Resources:', font=font), sg.Input(num_resources, key='-NUM_RESOURCES-', size=(5, 1), font=font)],
             [sg.Button('Create Matrices', key='-CREATE-', font=font, size=(18, 1))]
         ]
-
+        
         # Allocation matrix
         allocation_layout = [[sg.Text(' ', font=header_font)] + [sg.Text(f'R{j}', size=(4, 1), font=header_font) for j in range(num_resources)]]
         for i in range(num_processes):
@@ -30,6 +31,7 @@ class BankersGUILayout:
             for j in range(num_resources):
                 row.append(sg.Input('0', key=self.allocation_inputs[i][j], size=(5, 1), font=font, pad=(2, 2)))
             allocation_layout.append(row)
+        
         # Max matrix
         max_layout = [[sg.Text(' ', font=header_font)] + [sg.Text(f'R{j}', size=(4, 1), font=header_font) for j in range(num_resources)]]
         for i in range(num_processes):
@@ -45,6 +47,7 @@ class BankersGUILayout:
             for j in range(num_resources):
                 row.append(sg.Text('0', key=self.need_outputs[i][j], size=(5, 1), font=font, pad=(2, 2)))
             need_layout.append(row)
+        
         # Available resources
         available_layout = [[sg.Text('Available:', font=font, pad=(5, 5))]]
         resource_row = [sg.Input('0', key=self.available_inputs[j], size=(5, 1), font=font, pad=(3, 3)) for j in range(num_resources)]
@@ -97,3 +100,35 @@ class BankersGUILayout:
         
         return layout
     
+    def setup_input_matrices(self, num_processes, num_resources):
+        """Setup input matrix key arrays."""
+        # Reset arrays
+        self.allocation_inputs = []
+        self.max_inputs = []
+        self.need_outputs = []
+        self.available_inputs = []
+        
+        # Create allocation input keys
+        for i in range(num_processes):
+            allocation_row = []
+            for j in range(num_resources):
+                allocation_row.append(f'-ALLOC-{i}-{j}-')
+            self.allocation_inputs.append(allocation_row)
+        
+        # Create max input keys
+        for i in range(num_processes):
+            max_row = []
+            for j in range(num_resources):
+                max_row.append(f'-MAX-{i}-{j}-')
+            self.max_inputs.append(max_row)
+        
+        # Create need output keys
+        for i in range(num_processes):
+            need_row = []
+            for j in range(num_resources):
+                need_row.append(f'-NEED-{i}-{j}-')
+            self.need_outputs.append(need_row)
+        
+        # Create available resource input keys
+        for j in range(num_resources):
+            self.available_inputs.append(f'-AVAIL-{j}-')
