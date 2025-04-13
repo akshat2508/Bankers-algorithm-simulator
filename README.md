@@ -1,184 +1,131 @@
-
-
-```markdown
 # 🏦 Banker's Algorithm Simulator
 
-[![Python](https://img.shields.io/badge/Python-3.6+-blue.svg)](https://www.python.org/downloads/)
-[![License](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
-[![PySimpleGUI](https://img.shields.io/badge/PySimpleGUI-4.0+-orange.svg)](https://pysimplegui.readthedocs.io/)
-[![NetworkX](https://img.shields.io/badge/NetworkX-2.0+-red.svg)](https://networkx.org/)
-
-A comprehensive graphical simulator for the Banker's Algorithm — a classic deadlock avoidance algorithm used in operating systems for resource allocation.
+A comprehensive graphical simulator for the Banker's Algorithm — a classical resource allocation and deadlock avoidance strategy used in operating systems.
 
 ---
 
-## 📋 Table of Contents
+## 📌 Overview
 
-- [Overview](#overview)
-- [Features](#features)
-- [Project Structure](#project-structure)
-- [Module Breakdown](#module-breakdown)
-- [Technologies Used](#technologies-used)
-- [Installation](#installation)
-- [Usage](#usage)
-- [Examples](#examples)
-- [Contributing](#contributing)
-- [License](#license)
+The Banker's Algorithm Simulator is a Python-based desktop application that allows users to simulate, test, and visualize the working of the Banker's Algorithm. It's built with a focus on educational clarity, interactivity, and real-world relevance.
+
+This tool is ideal for:
+
+- Students trying to understand deadlock avoidance
+- Educators creating demonstrations or assignments
+- Developers building OS-level resource managers
 
 ---
 
-## 🔍 Overview
+## ✨ Key Features
 
-**Banker's Algorithm Simulator** is a Python-based desktop application that allows users to visually simulate the working of the Banker's Algorithm. Ideal for OS students, educators, and curious minds looking to explore safe/unsafe states, deadlocks, and resource allocation.
+- **Intuitive GUI** using PySimpleGUI
+- **Dynamic Resource Allocation** with step-by-step safety checks
+- **Custom Test Case Support** to simulate real-world resource distributions
+- **Deadlock Detection & Recovery** simulation logic
+- **Graphical Visualizations** of the Wait-For Graph (WFG) and Resource Allocation Graph (RAG)
+- **Request Validation** with live feedback on system state
 
 ---
 
-## ✨ Features
+## 🧠 Core Concepts Implemented
 
-- 🔘 **Interactive GUI** — Powered by PySimpleGUI  
-- 🔁 **Real-time Simulation** — Step-by-step resource allocation checks  
-- 🧠 **Deadlock Detection** — Supports unsafe and deadlock state analysis  
-- 📊 **Graph Visualizations** — Wait-For Graph (WFG) & Resource Allocation Graph (RAG)  
-- 🧪 **Pre-defined Test Cases** — Test various resource configurations  
-- ✍️ **Custom Inputs** — Design your own scenario from scratch  
-- 🛡️ **Safety Algorithm Support** — View safe sequences and validation outcomes  
+- **Banker's Algorithm Logic**
+- **Safety Sequence Validation**
+- **Need Matrix and Available Resource Calculations**
+- **Request Handling with Safety Checks**
+- **Deadlock Detection through Graph Analysis**
 
 ---
 
 ## 🗂️ Project Structure
 
-```
-akshat2508-bankers-algorithm-simulator/
-├── README.md                   # Project documentation
-├── main.py                    # Application entry point
-├── bankers_gui_layout.py      # GUI layout structure (PySimpleGUI)
-├── bankers_gui_controller.py  # Input handling and event logic
-├── bankers_module.py          # Core algorithm logic
-└── test_cases.py              # Predefined test case inputs
-```
+akshat2508-bankers-algorithm-simulator/ ├── README.md → Project documentation ├── main.py → Entry point for the simulator ├── bankers_module.py → Core logic for the Banker's Algorithm ├── bankers_gui_layout.py → UI layout and design (PySimpleGUI) ├── bankers_gui_controller.py → Event handling and logic controller └── test_cases.py → Predefined scenarios for testing
+
+yaml
+Copy
+Edit
 
 ---
 
-## 👨‍💻 Module Breakdown
+## 👥 Developer Roles
 
-### 🔧 Mansi — `bankers_module.py`, `test_cases.py`
+**Mansi**  
+- Implemented `bankers_module.py` and `test_cases.py`  
+- Focused on the algorithm core, safety checks, request processing, and unit testing
 
-- Implements core Banker's Algorithm logic:
-  - Resource allocation
-  - Safety checks
-  - Deadlock detection
-- Test cases include:
-  - Safe/unsafe states
-  - Edge cases (zero availability, full allocation, etc.)
+**Nandini**  
+- Developed `main.py` and `bankers_gui_layout.py`  
+- Designed user interface layouts and handled user inputs, forms, and visual components
 
----
-
-### 🎨 Nandini — `main.py`, `bankers_gui_layout.py`
-
-- GUI structure using **PySimpleGUI**
-- Fields for processes, resources, allocation/need matrices
-- Interface elements: buttons, tables, input fields, alerts
+**Akshat**  
+- Built `bankers_gui_controller.py`  
+- Connected UI to the algorithm logic, handled events, input validation, and visual result updates
 
 ---
 
-### 🔄 Akshat — `bankers_gui_controller.py`
+## 🛠️ Built With
 
-- Controls user interaction
-- Validates input & triggers backend logic
-- Manages:
-  - Request handling
-  - Resetting state
-  - Triggering WFG/RAG visualization
-
----
-
-## 🧰 Technologies Used
-
-### Languages
-- Python 3.6+
-
-### Libraries
-- [PySimpleGUI](https://pysimplegui.readthedocs.io/) — GUI framework  
-- [Matplotlib](https://matplotlib.org/) — Graph plotting  
-- [NetworkX](https://networkx.org/) — Graph logic & structure  
-- NumPy — Numerical matrix operations  
-
-### Dev Tools
-- Git & GitHub for collaboration  
-- VSCode for development  
+- **Python 3.6+**
+- **PySimpleGUI** - for GUI
+- **Matplotlib** - for plotting graphs
+- **NetworkX** - for graph-based resource allocation models
+- **NumPy** - for matrix operations
 
 ---
 
-## 🚀 Installation
+## ⚙️ Installation
 
-### Prerequisites
-Make sure Python 3.6+ is installed.
+1. Ensure Python 3.6 or above is installed
+2. Clone the repository:
+   ```bash
+   git clone https://github.com/akshat2508/bankers-algorithm-simulator.git
+   cd bankers-algorithm-simulator
+Install dependencies:
 
-Install required packages:
-```bash
+bash
+Copy
+Edit
 pip install pysimplegui matplotlib networkx numpy
-```
+🚀 How to Run
+Launch the app using:
 
-### Clone the Repo
-```bash
-git clone https://github.com/akshat2508/bankers-algorithm-simulator.git
-cd bankers-algorithm-simulator
-```
-
----
-
-## 🖥️ Usage
-
-Run the app:
-```bash
+bash
+Copy
+Edit
 python main.py
-```
+Follow on-screen steps to:
 
-### UI Workflow:
-- Set the number of processes and resource types
-- Input allocation, maximum need, and available resources
-- Submit requests and check safety
-- Visualize the system's WFG or RAG
+Enter number of processes and resources
 
----
+Define allocation and max requirement matrices
 
-## 📝 Examples
+Submit requests and check safety
 
-### ✅ Safety Check
-1. Launch the app  
-2. Input resource matrices  
-3. Click “Check Safety”  
-4. View safe sequence or get notified of unsafe state  
+Visualize WFG and RAG
 
-### 📌 Custom Requests
-1. Select a process  
-2. Input resource request  
-3. Click “Submit Request”  
-4. View if request is safely grantable  
+📊 Example Use Case
+Open the app
 
-### 🔍 Graph Visualization
-- “Show WFG” → Displays Wait-For Graph  
-- “Show RAG” → Displays Resource Allocation Graph  
+Load a test case or create a custom input
 
----
+Click “Check Safety” to see if the current state is safe
 
-## 👥 Contributing
+Submit a request and validate whether it's grantable
 
-Contributions are welcome!
+View graphs to understand process dependencies and allocations
 
-1. Fork the repository  
-2. Create your branch: `git checkout -b feature/your-feature`  
-3. Commit your changes: `git commit -m 'Add your message'`  
-4. Push and submit a PR  
+🤝 Contributions
+We welcome contributions from the community!
 
----
+Fork the repo
 
-Made with ❤️ by  
-**[Akshat](https://github.com/akshat2508)** ·  
-**[Mansi]([https://github.com/mansi](https://github.com/mansirathor27))** ·  
-**[Nandini]([https://github.com/nandini](https://github.com/Nandinisharma11))**
-```
+Create a new branch
 
----
+Make your changes
 
-Let me know if you want to turn this into a GitHub Pages doc site too, or need help generating a `.exe`/`.app` file with a sexy app icon 👑
+Submit a Pull Request
+
+📄 License
+This project is licensed under the MIT License.
+
+Made with ❤️ by Akshat, Mansi, and Nandini
