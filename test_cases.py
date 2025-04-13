@@ -1,50 +1,84 @@
 import numpy as np
+import copy
 
-def get_deadlock_case():
-    """Return sample data that demonstrates a deadlock situation."""
-    # Set allocation matrix
-    allocation = np.array([
-        [0, 1, 0],
-        [2, 0, 0],
-        [3, 0, 2],
-        [2, 1, 1],
-        [0, 0, 2]
-    ])
+class BankersAlgorithm:
+    """Model class implementing Banker's Algorithm."""
     
-    # Set max matrix
-    max_matrix = np.array([
-        [7, 5, 3],
-        [3, 2, 2],
-        [9, 0, 2],
-        [2, 2, 2],
-        [4, 3, 3]
-    ])
+    def __init__(self, num_processes=5, num_resources=3):
+        """Initialize the model with default dimensions."""
+        self.num_processes = num_processes
+        self.num_resources = num_resources
+        self.reset()
     
-    # Set available resources to create deadlock
-    available = np.array([0, 0, 0])
+    def reset(self):
+        """Reset the model state."""
+        self.setup_matrices()
+        self.completed_processes = []
     
-    return allocation, max_matrix, available
-def get_no_deadlock_case():
-    """Return sample data that demonstrates a safe state (no deadlock)."""
+    def setup_matrices(self):
+        """Initialize matrices with zeros."""
+        self.allocation_matrix = np.zeros((self.num_processes, self.num_resources), dtype=int)
+        self.max_matrix = np.zeros((self.num_processes, self.num_resources), dtype=int)
+        self.need_matrix = np.zeros((self.num_processes, self.num_resources), dtype=int)
+        self.available_resources = np.zeros(self.num_resources, dtype=int)
+        self.completed_processes = []
     
-    allocation = np.array([
-        [0, 1, 0],
-        [2, 0, 0],
-        [3, 0, 2],
-        [2, 1, 1],
-        [0, 0, 2]
-    ])
+    def calculate_need(self):
+        """Calculate the need matrix from max and allocation."""
+        self.need_matrix = self.max_matrix - self.allocation_matrix
+        
+        
+        if np.any(self.need_matrix < 0):
+            raise ValueError("Invalid allocation: Some allocations exceed maximum claims")
     
-   
-    max_matrix = np.array([
-        [7, 5, 3],
-        [3, 2, 2],
-        [9, 0, 2],
-        [2, 2, 2],
-        [4, 3, 3]
-    ])
+    def is_request_granted(self, process_idx):
+        """Check if the process's resource request can be granted."""
+  
+        for j in range(self.num_resources):
+            if self.need_matrix[process_idx][j] > self.available_resources[j]:
+                return False
+        return True
     
-    
-    available = np.array([10, 5, 7])
-    
-    return allocation, max_matrix, available
+    def get_safe_sequence(self):
+        """Run banker's algorithm to find a safe sequence."""
+        
+        work = copy.deepcopy(self.available_resources)
+        finish = [False] * self.num_processes
+        safe_sequence = []
+        self.completed_processes = []
+        
+       
+        while len(safe_sequence) < self.num_processes:
+            found = False
+            
+            for i in range(self.num_processes):
+                if not finish[i]:
+                   
+                    can_allocate = True
+                    for j in range(self.num_resources):
+                        if self.need_matrix[i][j] > work[j]:
+                            can_allocate = False
+                            break
+                    
+                    if can_allocate:
+                        
+                        safe_sequence.append(i)
+                        self.completed_processes.append(i)
+                        finish[i] = True
+                        found = True
+                        
+                        # Release resources
+                        for j in range(self.num_resources):
+                            work[j] += self.allocation_matrix[i][j]
+                        
+                        break
+            
+            # If no process can be added to sequence, we're done
+            if not found:
+                break
+        
+        # If all processes are in the sequence, it's safe
+        if len(safe_sequence) == self.num_processes:
+            return safe_sequence
+        else:
+            return None
