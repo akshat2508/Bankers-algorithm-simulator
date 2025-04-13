@@ -13,11 +13,12 @@ import matplotlib.patches as mpatches
 import networkx as nx
 import PySimpleGUI as sg
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+
 class BankersAlgorithmGUI:
     def __init__(self):
         self.model = BankersAlgorithm()
         self.layout_manager = BankersGUILayout()
-    
+        
     def update_model_from_ui(self, values):
         """Update model data from UI values."""
         try:
@@ -52,7 +53,7 @@ class BankersAlgorithmGUI:
         except ValueError as e:
             sg.popup_error(f"Invalid input: {str(e)}")
             return False
-        
+    
     def update_need_display(self, window):
         """Update need matrix display."""
         for i in range(self.model.num_processes):
@@ -80,7 +81,7 @@ class BankersAlgorithmGUI:
         
         except Exception as e:
             sg.popup_error(f"Failed to calculate need matrix: {str(e)}")
-
+    
     def detect_deadlock(self, window, values):
         """Detect deadlock using banker's algorithm."""
         if not self.update_model_from_ui(values):
@@ -347,6 +348,8 @@ class BankersAlgorithmGUI:
                                    "3. Calculate the Need matrix and detect potential deadlocks.\n\n"
                                    "You can also load sample test cases from the buttons above.\n")
     
+
+
     def create_rag_graph(self, values):
         """Create and display a Wait-For Graph visualization."""
         if not self.update_model_from_ui(values):
@@ -534,7 +537,6 @@ class BankersAlgorithmGUI:
         plt.close(fig)
         graph_window.close()
 
-        
 
     def create_wfg(self, values):
         """Create and display a Resource Allocation Graph (RAG) visualization."""
@@ -700,15 +702,6 @@ class BankersAlgorithmGUI:
         plt.close(fig)
         graph_window.close()
 
-
-
-
-
-
-
-
-
-    
     def run(self):
         """Main function to run the application."""
         # Update layout manager to include the RAG button
