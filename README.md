@@ -126,6 +126,11 @@ Click "Submit Request" to simulate a process asking for more resources
 Visualize process/resource states via WFG or RAG buttons
 ```
 
+💻 GUI PREVIEW
+<img width="970" alt="Screenshot 2025-04-15 at 7 31 05 PM" src="https://github.com/user-attachments/assets/f8e2ffdd-0f87-4301-8a28-6ee75c0b4c48" />
+<img width="970" alt="Screenshot 2025-04-15 at 7 31 28 PM" src="https://github.com/user-attachments/assets/520cf646-d263-495f-96d1-e2816f0adaba" />
+
+
 
 🤝 Contributing
 
