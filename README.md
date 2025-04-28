@@ -50,7 +50,12 @@ akshat2508-bankers-algorithm-simulator/
 
 
 ---
+## Download LINK
 
+ Drive Link -- https://drive.google.com/file/d/19ksmsOVlcU-wm6c8UmPrVRxun7Lt7qH1/view?usp=sharing
+
+
+---
 ## 👥 Developer Roles
 
 **Mansi**  
